@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bet the Debt</title>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <!-- Log in / sign up -->
+    <div id="login" class="screen" hidden>
+      <form id="login-form" class="card" autocomplete="on">
+        <h1 class="game-name"></h1>
+        <p class="tagline">The house lends you 500. The house always collects.</p>
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" data-mode="login" class="active">Log in</button>
+          <button type="button" role="tab" data-mode="register">Sign up</button>
+        </div>
+        <label>Username<input id="login-name" name="username" maxlength="16" autocomplete="username" required /></label>
+        <label>Password<input id="login-pass" name="password" type="password" maxlength="72" autocomplete="current-password" required /></label>
+        <div class="field">
+          <span>Your colour</span>
+          <div id="swatches" class="swatches"></div>
+        </div>
+        <p id="login-error" class="error" role="alert"></p>
+        <button id="login-submit" class="primary big" type="submit">Log in</button>
+      </form>
+    </div>
+
+    <!-- In-game overlay -->
+    <div id="hud" hidden>
+      <div id="topbar">
+        <span id="me-name" class="pill"></span>
+        <span class="pill cash" title="Cash: yours to keep between runs"><b id="cash">$0</b></span>
+        <span id="chips-pill" class="pill chips" hidden><i class="coin"></i><b id="chips">0</b></span>
+        <span id="run" class="pill run" hidden></span>
+        <span id="lobby-pill" class="pill quiet"></span>
+        <span id="online" class="pill quiet"></span>
+        <span class="pill quiet esc-hint"><kbd>Esc</kbd> menu</span>
+      </div>
+      <div id="vitals">
+        <div class="vrow">
+          <div class="vbar health" title="Health">
+            <svg viewBox="0 0 12 12"><path d="M6 10.5 1.6 6.2A2.6 2.6 0 0 1 6 2.6a2.6 2.6 0 0 1 4.4 3.6z" /></svg>
+            <span><b></b></span>
+          </div>
+        </div>
+        <div class="vrow">
+          <div class="vbar hunger" title="Food: eat before it runs out">
+            <svg viewBox="0 0 12 12"><circle cx="6" cy="7" r="4" /><rect x="5.4" y="1" width="1.2" height="3" rx="0.6" /></svg>
+            <span><b></b></span>
+          </div>
+        </div>
+        <div class="vrow">
+          <div class="vbar thirst" title="Water: drink before it runs out">
+            <svg viewBox="0 0 12 12"><path d="M6 1.2C4.6 3.6 2.8 5.4 2.8 7.6a3.2 3.2 0 0 0 6.4 0C9.2 5.4 7.4 3.6 6 1.2z" /></svg>
+            <span><b></b></span>
+          </div>
+          <div class="vbar bladder" title="Bladder: press P to pee">
+            <svg viewBox="0 0 12 12"><path d="M6 1.2C4.6 3.6 2.8 5.4 2.8 7.6a3.2 3.2 0 0 0 6.4 0C9.2 5.4 7.4 3.6 6 1.2z" /></svg>
+            <span><b></b></span>
+          </div>
+        </div>
+        <div id="bac" title="Blood alcohol. Past 3.0 ‰ it can kill you.">0.00 ‰</div>
+        <div id="gut-chance" hidden title="Chance of a gut feeling at your next decision. It grows with every decision that brings none, and faster the more you have had to drink."></div>
+        <div id="effects"></div>
+      </div>
+      <div id="peek" hidden><h4>🍄 Third Eye</h4><pre></pre></div>
+      <div id="hotbar"></div>
+      <div id="crosshair"></div>
+      <div id="prompt" hidden></div>
+      <div id="click-hint" hidden>Click to look around</div>
+      <div id="toasts"></div>
+      <div id="chat">
+        <div id="chat-log"></div>
+        <input id="chat-input" maxlength="200" placeholder="Press Enter to chat" autocomplete="off" />
+      </div>
+      <div id="game-hud"></div>
+    </div>
+
+    <!-- Esc menu -->
+    <div id="menu" class="screen" hidden>
+      <div class="card menu-card">
+        <h1 id="menu-title"></h1>
+        <button class="primary big" data-menu="resume">Resume</button>
+        <button class="big" data-menu="controls">Controls</button>
+        <div id="menu-controls" class="menu-controls" hidden>
+          <div><kbd>W A S D</kbd><span>Walk</span></div>
+          <div><kbd>Shift</kbd><span>Run</span></div>
+          <div><kbd>Space</kbd><span>Jump</span></div>
+          <div><kbd>Mouse</kbd><span>Look around (click the game first)</span></div>
+          <div><kbd>Click</kbd><span>Punch, eat / drink, take a drug, or shoot</span></div>
+          <div><kbd>1 2 3 4</kbd><span>Hold an item (at a table: eat / drink it)</span></div>
+          <div><kbd>E</kbd><span>Use: sit, the doorman, bar, toilet, a dealer, a body…</span></div>
+          <div><kbd>H</kbd><span>Hide a body in a restroom stall</span></div>
+          <div><kbd>P</kbd><span>Pee (again to stop)</span></div>
+          <div><kbd>Enter</kbd><span>Chat</span></div>
+          <div><kbd>Esc</kbd><span>This menu (or close the chat)</span></div>
+          <div><kbd>H S D P</kbd><span>Blackjack: hit, stand, double, split</span></div>
+          <div><kbd>F C</kbd><span>Poker: fold, check / call</span></div>
+        </div>
+        <button class="big" data-menu="help">How to play</button>
+        <div id="menu-help" class="menu-help" hidden>
+          <p><b>Home.</b> You live at the Lucky Arms, across the street from the casino. Walk out of your apartment, down the hall and over the road. The computer on your desk has your bank account and the shop.</p>
+          <p><b>Lobbies.</b> The doorman at the casino lets you start a lobby (you get a code to give your friends) or join one. Everyone in a lobby shares the street, the building and the casino, and can visit each other's apartments.</p>
+          <p><b>The run.</b> The house fronts you 500 chips at the door. Every few hands it takes an ante, and the ante keeps growing (how fast depends on the difficulty the lobby was started at: Easy, Normal or Hard). The top bar shows what you would walk out with right now. Fall below 10 chips and security walks you out back. Cash out at the cashier by the entrance: you pay back the 500 and keep the rest as cash, for good.</p>
+          <p><b>Dying.</b> You haunt the casino, unseen, until everyone else in your lobby has cashed out or died. Then you wake up in your bed, with nothing to show for that run.</p>
+          <p><b>The casino.</b> Blackjack and roulette in the main hall. Poker and baccarat in the card room through the big arch. Liar's dice and Meyer in the dice parlour on the right. And somewhere in the card room, a red book that is not a book.</p>
+          <p><b>Your body.</b> Keep fed and watered (the bar in the casino, for chips; the fridge at home, free), or your health drains. Drink fills your bladder fast: press P to pee, ideally at a toilet. Every flat has one, and there is a stall in the casino. Miss, and the cleaner bills you.</p>
+          <p><b>Drink.</b> The drunker you are, the more often you get gut feelings at the tables, and every decision without one makes the next likelier: the chance shows under your ‰. Trust them: a gut feeling is always the winning call, and its button lights up purple. Past 3.0 ‰ every drink can kill you. At 3.5 ‰ it will.</p>
+          <p><b>Hands.</b> What you order goes in your hotbar (bottom of the screen). Press 1-4 to hold something, click to take a bite or a sip. With nothing in your hand, a click is a punch.</p>
+          <p><b>Guns.</b> Pistols are on the shop at home. Hold one and click to shoot, inside the casino only. Anyone who sees a killing calls security, and a loud gun is heard everywhere. The restrooms (the door in the main hall's left wall) are the one place nobody out in the casino sees into, and they muffle a loud gun: press H to sit a body in a stall. Whoever dies on a run leaves everything they had on their body, guns too. Press E over one to go through the pockets.</p>
+          <p><b>The street.</b> Two dealers hang about at the dark ends of the street. Snow makes every gut feeling come, Third Eye lets you see hidden cards and dice, Ice Water keeps you steady and alive however much you drink.</p>
+          <p><b>Controls.</b> WASD to walk, Shift to run, Space to jump, mouse to look. Click to punch, or to eat or drink what you are holding. 1-4 to pick what you hold (at a table, 1-4 eats or drinks it straight away). E to sit down or use things. P to pee. Enter to chat, Esc to close the chat or open this menu.</p>
+        </div>
+        <button id="menu-leave" class="big" data-menu="leave">Leave table</button>
+        <button id="menu-lobby" class="big" data-menu="lobby">Leave lobby</button>
+        <button class="big" data-menu="logout">Log out</button>
+      </div>
+    </div>
+
+    <!-- The doorman, the cashier: small conversations -->
+    <div id="dialog" class="screen" hidden>
+      <div class="card menu-card">
+        <h1 id="dialog-title"></h1>
+        <div id="dialog-body" class="dialog-body"></div>
+        <div id="dialog-buttons" class="dialog-buttons"></div>
+      </div>
+    </div>
+
+    <!-- The bar: food and drink, paid in chips -->
+    <div id="bar-menu" class="screen" hidden>
+      <div class="card bar-card">
+        <h1>The Bar</h1>
+        <p class="bar-sub">Paid in chips. The bartender does not judge. Out loud.</p>
+        <div id="bar-tabs" class="bar-tabs"></div>
+        <div id="bar-items" class="bar-items"></div>
+        <button class="big" data-bar="close">Done</button>
+      </div>
+    </div>
+
+    <!-- Drink, and the edges of the world go soft. Close your eyes, and it all goes dark. -->
+    <div id="drunk-vignette"></div>
+    <div id="eyelids"><div class="lid top"></div><div class="lid bottom"></div></div>
+
+    <!-- The computer on the desk at home -->
+    <div id="pc" hidden>
+      <div class="pc-monitor">
+        <div id="pc-screen" class="pc-screen"></div>
+        <div class="pc-bezel"><span class="pc-brand">LUCKY·TRON 2000</span><span class="pc-led"></span></div>
+      </div>
+      <div class="pc-hint"><kbd>Esc</kbd> to stand up</div>
+    </div>
+
+    <!-- Dead, waiting for the others -->
+    <div id="ghost-banner" hidden>You're dead. Nobody can see you. You'll wake up at home when your friends are done.</div>
+
+    <!-- A quick fade to black when you go through a door -->
+    <div id="fade"></div>
+
+    <!-- Getting shot -->
+    <div id="flash"></div>
+    <div id="death" hidden>
+      <div class="death-card">
+        <h2>Bang.</h2>
+        <p id="death-text"></p>
+        <p class="death-sub">Security apologises for the inconvenience.</p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
