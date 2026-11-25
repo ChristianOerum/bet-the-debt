@@ -11,6 +11,7 @@ The house lends you 500. The house always collects.
 ![Node.js 22.5+](https://img.shields.io/badge/Node.js-22.5%2B-5FA04E?logo=nodedotjs&logoColor=white)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?logo=socketdotio&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 <img src="docs/screenshots/blackjack.jpg" width="31%" alt="A blackjack table, betting with 1, 5 and 10 chips"> <img src="docs/screenshots/penthouse.jpg" width="31%" alt="The penthouse at night"> <img src="docs/screenshots/roulette-third-eye.jpg" width="31%" alt="Roulette under the influence of Third Eye">
 <img src="docs/screenshots/street-dealer.jpg" width="31%" alt="Sketchy Steve, a dealer on the street"> <img src="docs/screenshots/restroom-mirror.jpg" width="31%" alt="The casino restroom, with a real mirror"> <img src="docs/screenshots/penthouse-living.jpg" width="31%" alt="The penthouse living room">
@@ -45,6 +46,7 @@ downloaded assets.
 - [How it's built](#how-its-built)
 - [Tests](#tests)
 - [Hosting it in the cloud](#hosting-it-in-the-cloud)
+- [License](#license)
 
 ## Features
 
@@ -320,3 +322,7 @@ start with `npm start`. The host sets the port.
 Free hosts usually wipe local files on restart, which would reset `casino.db`. Either attach a
 persistent disk and point `DB_PATH` at it, or add a second implementation of the `Store`
 interface (`server/src/store/Store.ts`) for a hosted database. No game code needs to change.
+
+## License
+
+[MIT](LICENSE). Play it, fork it, change it, host it.
